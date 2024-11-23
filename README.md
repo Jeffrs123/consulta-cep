@@ -256,7 +256,8 @@ Se a URL for válida, a aplicação procede para o próximo passo.
 - **Início**: O endpoint é acionado quando o usuário faz uma solicitação de consulta ao histórico.
 - **Validação dos Parâmetros de Consulta**:
     - Os parâmetros fornecidos na solicitação (como size e page são números) são validados.
-    - Se inválidos: o sistema retorna um erro 400: Parâmetros Inválidos.
+    - Se inválidos: o sistema retorna um erro 500: Parâmetros Inválidos.
+    - **Obs.**: Lógica para validação customizada não implementada.
 
 - **Consulta ao Banco de Dados**: Uma consulta SQL é executada no banco de dados para buscar os dados do histórico com base nos parâmetros fornecidos.
 - **Verificação dos Resultados da Consulta**: 
