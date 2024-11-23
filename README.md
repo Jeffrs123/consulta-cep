@@ -8,6 +8,10 @@
    - [Docker Compose](#docker-compose)
 
 2. [Design da Solução](#design-da-solução)
+   - [Diagrama](#diagrama)
+        - [Diagrama da Consulta de CEP](#diagrama-da-consulta-de-cep)
+        - [Diagrama para Alterar Provider](#diagrama-para-alterar-provider)
+        - [Diagrama Histórico de Consulta](#diagrama-histórico-de-consulta)
    - [Arquitetura](#arquitetura)
    - [Fluxo de Execução](#fluxo-de-execução)
    - [Padrões de Design Adotados](#padrões-de-design-adotados)
@@ -34,6 +38,7 @@ A aplicação também grava logs de todas as consultas realizadas, incluindo o h
 - **Consulta CEP**: Realiza a consulta de um CEP, retornando as informações de endereço.
 - **Alteração Dinâmica do Provider**: Permite trocar o provider utilizado para consulta (por exemplo, Mockoon, - WireMock, ou APIs externas reais).
 - **Logs de Consultas**: Registra todas as consultas realizadas no banco de dados.
+- **Histórico de Consultas**: Retornar as consultas realizadas.
 - **Validação de CEP**: Valida se o CEP informado está correto (apenas números).
 - **Swagger**: Documentação interativa da API disponível via Swagger UI.
 
@@ -146,9 +151,13 @@ Isso vai iniciar o PostgreSQL no container, e você pode acessar o banco de dado
 
 # Design da Solução
 
+## Diagrama
+
+### Diagrama da Consulta de CEP
+
 ```mermaid
     flowchart TD
-        A[Início da requisição] --> B[CEP válido?]
+        A[Requisição GET para /api/cep/:cep] --> B[CEP válido?]
         B -- Não --> C[Retornar erro de CEP inválido]
         B -- Sim --> D[Escolher provider configurado]
         D --> E[Consultando o provider]
@@ -171,6 +180,136 @@ Isso vai iniciar o PostgreSQL no container, e você pode acessar o banco de dado
         class J valid;
 
 ```
+
+**Explicação do fluxo**:
+- **Início da requisição**: O usuário envia uma requisição para consultar o CEP.
+- **Validação do CEP**: Verifica se o CEP contém apenas números. Se não, um erro é retornado.
+- **Escolha do provider**: A aplicação seleciona qual provider usar para realizar a consulta (Mockoon, WireMock ou API externa).
+- **Consulta ao provider**: A aplicação faz a requisição ao provider configurado via RestTemplate.
+- **Consulta bem-sucedida?**: Verifica se a consulta ao provider foi bem-sucedida. Se falhar, um erro é retornado.
+- **Gravação no banco de dados**: Após a consulta, os dados (CEP, provider, dados retornados e timestamp) são salvos no banco de dados.
+- **Resposta ao usuário**: A aplicação retorna os dados do CEP consultado ao usuário.
+
+
+---
+
+### Diagrama para Alterar Provider
+
+```mermaid
+flowchart TD
+    A[Requisição POST para /api/cep/set-provider] --> B[Valida URL do Provider]
+    B --> C{URL Válida?}
+    C -- Não --> D[Retorna erro 400: URL inválida]
+    C -- Não --> E[Atualiza provider no banco de dados]
+    E --> F[Resposta com status 200: Provider atualizado com sucesso]
+
+    classDef valid fill:#6fdf6f,stroke:#2d6d2b;
+    classDef invalid fill:#f4cccc,stroke:#c4353e;
+    class B valid;
+    class C valid;
+    class D invalid;
+    class E valid;
+    class F valid;
+```
+
+
+**Explicação do Fluxo**:
+
+- **Requisição POST**: O fluxo começa quando uma requisição POST é feita para o endpoint ``/api/cep/set-provider``. O cliente envia a URL do provider como parâmetro na query string (por exemplo, ``?providerUrl=mockoon`` ou ``?providerUrl=publicapi``).
+
+- **Validação da URL**: A aplicação valida se a URL fornecida é válida. Isso inclui verificar se o formato da URL está correto e se é uma URL que pode ser acessada para realizar consultas de CEP.
+
+- **Verificação de URL válida**: O sistema verifica se a URL fornecida é válida.
+
+Se a URL for inválida, a aplicação retorna um erro 400 com a mensagem: "URL inválida".
+Se a URL for válida, a aplicação procede para o próximo passo.
+- **Atualização do Provider**: Caso a URL seja válida, a aplicação atualiza o provider configurado. Isso envolve armazenar a URL fornecida no banco de dados ou em uma configuração centralizada da aplicação, garantindo que futuras consultas ao CEP usem esse novo provider.
+
+- **Resposta de Sucesso**: Após a atualização bem-sucedida, o sistema responde com um status 200 e a mensagem "Provider atualizado com sucesso", indicando que a alteração foi realizada com sucesso.
+
+### Diagrama Histórico de Consulta
+
+```mermaid
+    flowchart TD
+        A[Requisição GET para /api/adm/list-logs] --> ValidaParametros{Parâmetros de Consulta Válidos?}
+        ValidaParametros -- Não --> Erro400[Erro 400: Parâmetros Inválidos]
+        ValidaParametros -- Sim --> ConsultaBanco[(Consulta ao Banco de Dados)]
+        ConsultaBanco --> VerificaResultado{Resultado Encontrado?}
+        VerificaResultado -- Não --> RetornaVazio[Retorna Lista Vazia]
+        VerificaResultado -- Sim --> FormataResposta[Formata Dados em JSON]
+        FormataResposta --> RetornaResposta[Retorna Dados para o Cliente]
+
+        
+    classDef valid fill:#6fdf6f,stroke:#2d6d2b;
+    classDef invalid fill:#f4cccc,stroke:#c4353e;
+    class ValidaParametros valid;
+    class Erro400 invalid;
+    class ConsultaBanco valid;
+    class VerificaResultado valid;
+    class RetornaVazio invalid;
+    class FormataResposta valid;
+    class RetornaResposta valid;
+```
+
+**Explicação do Fluxo do Endpoint de Histórico de Consulta**
+
+- **Início**: O endpoint é acionado quando o usuário faz uma solicitação de consulta ao histórico.
+- **Validação dos Parâmetros de Consulta**:
+    - Os parâmetros fornecidos na solicitação (como size e page são números) são validados.
+    - Se inválidos: o sistema retorna um erro 400: Parâmetros Inválidos.
+
+- **Consulta ao Banco de Dados**: Uma consulta SQL é executada no banco de dados para buscar os dados do histórico com base nos parâmetros fornecidos.
+- **Verificação dos Resultados da Consulta**: 
+    - O sistema verifica se há registros correspondentes.
+    - Se nenhum registro for encontrado: retorna uma lista vazia para o cliente.
+- **Formatação da Resposta**: Os dados recuperados são organizados e formatados no formato JSON para facilitar a leitura pelo cliente.
+
+- **Retorno ao Cliente**: A resposta final, contendo os dados ou uma lista vazia, é enviada de volta ao cliente.
+
+<!--
+    TODO: LÓGICA DESEJADA POR SER IMPLEMENTADA
+
+(Para o mermeid "funcionar" tirar o espaço entre "-- e >")
+
+```mermaid
+    flowchart TD
+        Inicio([Início]) -- > VerificaAutenticacao{Usuário Autenticado?}
+        VerificaAutenticacao -- Não -- > Erro401[Erro 401: Não Autorizado]
+        VerificaAutenticacao -- Sim -- > ValidaParametros{Parâmetros de Consulta Válidos?}
+        ValidaParametros -- Não -- > Erro400[Erro 400: Parâmetros Inválidos]
+        ValidaParametros -- Sim -- > ConsultaBanco[(Consulta ao Banco de Dados)]
+        ConsultaBanco -- > VerificaResultado{Resultado Encontrado?}
+        VerificaResultado -- Não -- > RetornaVazio[Retorna Lista Vazia]
+        VerificaResultado -- Sim -- > FormataResposta[Formata Dados em JSON]
+        FormataResposta -- > RetornaResposta[Retorna Dados para o Cliente]
+```
+
+**Explicação do Fluxo do Endpoint de Histórico de Consulta**
+- **Início**: O endpoint é acionado quando o cliente faz uma solicitação de consulta ao histórico.
+
+- **Verificação de Autenticação**: 
+    - O sistema verifica se o cliente está autenticado com um token válido.
+    - Se não autenticado: o endpoint retorna um erro 401: Não Autorizado.
+
+- **Validação dos Parâmetros de Consulta**: 
+    - Os parâmetros fornecidos na solicitação (como data, usuário ou filtros) são validados.
+    - Se inválidos: o sistema retorna um erro 400: Parâmetros Inválidos.
+
+- **Consulta ao Banco de Dados**: Uma consulta SQL é executada no banco de dados para buscar os dados do histórico com base nos parâmetros fornecidos.
+
+- **Verificação dos Resultados da Consulta**: 
+    - O sistema verifica se há registros correspondentes.
+    - Se nenhum registro for encontrado: retorna uma lista vazia para o cliente.
+
+- **Formatação da Resposta**: Os dados recuperados são organizados e formatados no formato JSON para facilitar a leitura pelo cliente.
+
+- **Retorno ao Cliente**: A resposta final, contendo os dados ou uma lista vazia, é enviada de volta ao cliente.
+
+
+    
+-->
+
+---
 
 ## Arquitetura
 
