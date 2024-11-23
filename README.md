@@ -64,6 +64,7 @@ Para rodar a aplicação, basta executar o comando:
     ```bash
     mvn spring-boot:run
     ```
+<!-- 
 
     Ou, caso prefira rodar a aplicação como um arquivo JAR:
 
@@ -72,6 +73,8 @@ Para rodar a aplicação, basta executar o comando:
     java -jar target/consulta-cep-api.jar
     ```
 
+ -->
+ 
 2. Alterando o Provider
 
     Você pode alterar o provider utilizado para consulta via um endpoint específico. A aplicação suporta Mockoon, WireMock ou qualquer API externa configurada.
@@ -79,13 +82,13 @@ Para rodar a aplicação, basta executar o comando:
     Para mudar o provider, faça uma requisição POST para o seguinte endpoint:
 
     ```http
-    POST /api/cep/set-provider?providerUrl={url_do_provider}
+    POST /api/cep/set-provider?providerUrl={provider_name}
     ```
 
     Exemplo:
 
     ```http
-    POST /api/cep/set-provider?providerUrl=http://localhost:3000/api
+    POST /api/cep/set-provider?providerUrl=publicapi
     ```
 
     Onde providerUrl é a URL do provider desejado, as opções disponíveis no momento são: **mockoon** e **publicapi**.
