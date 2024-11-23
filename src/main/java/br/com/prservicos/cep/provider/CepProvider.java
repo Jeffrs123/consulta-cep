@@ -1,8 +1,8 @@
 package br.com.prservicos.cep.provider;
 
-import br.com.prservicos.cep.model.dto.ResponseCep;
+import br.com.prservicos.cep.model.dto.CepResponseDTO;
 
 public interface CepProvider {
-    ResponseCep consultarCep(String cep);
-    ResponseCep consultarCep2(String cep);
+    CepResponseDTO consultarCep(String cep);
+    CepResponseDTO consultarCep2(String cep);
 }

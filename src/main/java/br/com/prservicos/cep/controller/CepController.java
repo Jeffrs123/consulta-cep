@@ -1,7 +1,9 @@
 package br.com.prservicos.cep.controller;
 
-import br.com.prservicos.cep.model.dto.ResponseCep;
+import br.com.prservicos.cep.model.dto.CepResponseDTO;
 import br.com.prservicos.cep.service.CepService;
+import br.com.prservicos.cep.validation.cep.ValidCep;
+import br.com.prservicos.cep.validation.cep.ValidProvider;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,19 +17,14 @@ public class CepController {
         this.cepService = cepService;
     }
 
-
-    @GetMapping("/old/{cep}")
-    public String consultarCep2(@PathVariable String cep) {
-        return "cepService.consultarCep(cep)";
-    }
     @GetMapping(value = "/{cep}", produces = "application/json")
-    public ResponseEntity<ResponseCep> consultarCep(@PathVariable /*@ValidCep*/ String cep) {
-        ResponseCep responseCep =  cepService.consultarCep(cep);
-        return ResponseEntity.ok(responseCep);
+    public ResponseEntity<CepResponseDTO> consultarCep(@PathVariable @ValidCep String cep) {
+        CepResponseDTO cepResponseDTO =  cepService.consultarCep(cep);
+        return ResponseEntity.ok(cepResponseDTO);
     }
 
     @PostMapping("/set-provider")
-    public String setProvider(@RequestParam /*@ValidProvider*/ String provider) {
+    public String setProvider(@RequestParam @ValidProvider String provider) {
         return cepService.updateCurrentProvider(provider);
     }
 }

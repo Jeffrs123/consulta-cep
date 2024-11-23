@@ -1,0 +1,26 @@
+version: '3.8'
+services:
+  postgres-db:
+    image: postgres:15
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: cep_logs
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      
+  mockoon-server:
+    image: mockoon/cli:latest
+    container_name: mockoon-server
+    command: -d /mockoon.json -p 3000 3001
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./mockoon-data/data/mockoon.json:/mockoon.json:ro
+    restart: always
+
+volumes:
+  db-data:

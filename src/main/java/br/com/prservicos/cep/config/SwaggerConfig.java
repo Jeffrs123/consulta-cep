@@ -11,7 +11,7 @@ public class SwaggerConfig {
     public GroupedOpenApi appCepConsult() {
         return GroupedOpenApi.builder()
                 .group("cep-api")
-                .pathsToMatch("/api/cep/**")
+                .pathsToMatch("/api/cep/**", "/api/adm/**")
                 .build();
     }
 

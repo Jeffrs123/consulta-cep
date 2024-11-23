@@ -1,0 +1,30 @@
+{
+  "uuid": "",
+  "lastMigration": 29,
+  "name": "Tutorial - Generate mock data",
+  "endpointPrefix": "",
+  "latency": 0,
+  "port": 3001,
+  "routes": [
+    {
+      "uuid": "123e4567-e89b-12d3-a456-426614174000",
+      "documentation": "Get CEP details",
+      "method": "GET",
+      "endpoint": "/api/cep/:cep",
+      "responses": [
+        {
+          "uuid": "123e4567-e89b-12d3-a456-426614174001",
+          "headers": {"Content-Type": "application/json"},
+          "body": "{\"cep\": \"{{urlParam 'cep'}}\", \"logradouro\": \"Rua Mockada\", \"bairro\": \"Bairro Teste\", \"cidade\": \"Cidade Mock\", \"estado\": \"Estado Mock\"}",
+          "statusCode": 200,
+          "label": "Default response"
+        }
+      ],
+      "enabled": true,
+      "responseMode": "last",
+      "fallbackTo404": false,
+      "uuidMatch": false,
+      "state": "authenticated"
+    }
+  ]
+}
