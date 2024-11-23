@@ -151,7 +151,16 @@ Isso vai iniciar o PostgreSQL no container, e você pode acessar o banco de dado
 
 # Design da Solução
 
+
+---
+
 ## Diagrama
+
+Para melhor experiência veremos os 3 comportamentos que esperamos que aconteça para a nossa aplicação.
+Sendo o primeiro, o comportamento proposto como desafio, e os demais diagramas como complemento para melhor experiência para a solução proposta.
+
+
+---
 
 ### Diagrama da Consulta de CEP
 
@@ -226,6 +235,9 @@ Se a URL for válida, a aplicação procede para o próximo passo.
 - **Atualização do Provider**: Caso a URL seja válida, a aplicação atualiza o provider configurado. Isso envolve armazenar a URL fornecida no banco de dados ou em uma configuração centralizada da aplicação, garantindo que futuras consultas ao CEP usem esse novo provider.
 
 - **Resposta de Sucesso**: Após a atualização bem-sucedida, o sistema responde com um status 200 e a mensagem "Provider atualizado com sucesso", indicando que a alteração foi realizada com sucesso.
+
+
+---
 
 ### Diagrama Histórico de Consulta
 
@@ -464,3 +476,9 @@ Os princípios SOLID foram cuidadosamente aplicados na arquitetura e no código 
 - Faça as alterações desejadas.
 - Commit e push: ``git commit -am 'Adicionando nova feature' && git push origin feature/minha-feature``.
 - Abra um Pull Request para a branch ``main``.
+
+
+---
+
+## Referências
+Desse desafio gerou <a href="https://github.com/Jeffrs123/tutorials" target="_blank">Repositório tutorials</a>, como apoio para ambiente
