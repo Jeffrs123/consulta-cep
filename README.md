@@ -232,7 +232,7 @@ Se a URL for válida, a aplicação procede para o próximo passo.
 ```mermaid
     flowchart TD
         A[Requisição GET para /api/adm/list-logs] --> ValidaParametros{Parâmetros de Consulta Válidos?}
-        ValidaParametros -- Não --> Erro400[Erro 400: Parâmetros Inválidos]
+        ValidaParametros -- Não --> Erro500[Erro 500: Parâmetros Inválidos]
         ValidaParametros -- Sim --> ConsultaBanco[(Consulta ao Banco de Dados)]
         ConsultaBanco --> VerificaResultado{Resultado Encontrado?}
         VerificaResultado -- Não --> RetornaVazio[Retorna Lista Vazia]
@@ -243,7 +243,7 @@ Se a URL for válida, a aplicação procede para o próximo passo.
     classDef valid fill:#6fdf6f,stroke:#2d6d2b;
     classDef invalid fill:#f4cccc,stroke:#c4353e;
     class ValidaParametros valid;
-    class Erro400 invalid;
+    class Erro500 invalid;
     class ConsultaBanco valid;
     class VerificaResultado valid;
     class RetornaVazio invalid;
