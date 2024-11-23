@@ -22,6 +22,8 @@
 
 5. [Como Contribuir](#como-contribuir)
 
+6. [Referências](#referências)
+
 
 ---
 
